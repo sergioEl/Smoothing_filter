@@ -92,7 +92,7 @@ public class SmoothingFilter extends Frame implements ActionListener {
 		//by Seokho Han
 		if ( ((Button)e.getSource()).getLabel().equals("5x5 mean") ) {
 			System.out.println("5X5 mean filter!");
-			
+
 			//store original RGbs
 			int [][] rPixels = new int[height][width];
 			int [][] gPixels = new int[height][width];
@@ -102,93 +102,51 @@ public class SmoothingFilter extends Frame implements ActionListener {
 			int [][] newGreenPixels = new int[height][width];
 			int [][] newBluePixels = new int[height][width];
 
+
+			//+++
 			//store original RGBs into arrays
 			for ( int y=0 ; y<height ; y++ ){
 				for ( int x=0 ; x<width ; x++) {
 					Color clr = new Color(source.image.getRGB(x, y));
 					rPixels[y][x] = clr.getRed();
-					bPixels[y][x] = clr.getGreen();
-					gPixels[y][x] = clr.getBlue();
+					gPixels[y][x] = clr.getGreen();
+					bPixels[y][x] = clr.getBlue();
 				}
 			}
-			//5x5 mean filter implementation
-			int w = 2;
-			//traveling rows
-			for (int q = 0; q < height; q++){
-				int sumRed = 0, sumGreen = 0, sumBlue = 0;
 
-				for (int u = -w; u <= w; u++){
-					sumRed += rPixels[q][u + w];
-					sumGreen += gPixels[q][u + w];
-					sumBlue += bPixels[q][u + w];
-				}
-
-				newRedPixels[q][w] = sumRed / (2 * w + 1);
-				newGreenPixels[q][w] = sumGreen / (2 * w + 1);
-				newBluePixels[q][w] = sumBlue / (2 * w + 1);
-
-				for (int p = w + 1; p < width - w; p++){
-					sumRed += rPixels[q][p + w] - rPixels[q][p - w - 1];
-					sumGreen += gPixels[q][p + w] - gPixels[q][p - w - 1];
-					sumBlue += bPixels[q][p + w] - bPixels[q][p - w - 1];
-					newRedPixels[q][p] = sumRed / (2 * w + 1);
-					newGreenPixels[q][p] = sumGreen / (2 * w + 1);
-					newBluePixels[q][p] = sumBlue / (2 * w + 1);
-				}
-			}
-			//traveling cols
-			for (int q = 0; q < width; q++){
-				int sumRed = 0, sumGreen = 0, sumBlue = 0;
-
-				for (int u = -w; u <= w; u++){
-					sumRed += rPixels[u + w][q];
-					sumGreen += gPixels[u + w][q];
-					sumBlue += bPixels[u + w][q];
-				}
-
-				newRedPixels[w][q] = sumRed / (2 * w + 1);
-				newGreenPixels[w][q] = sumGreen / (2 * w + 1);
-				newBluePixels[w][q] = sumBlue / (2 * w + 1);
-
-				for (int p = w + 1; p < height - w; p++){
-					sumRed += rPixels[p + w][q] - rPixels[p - w - 1][q];
-					sumGreen += gPixels[p + w][q] - gPixels[p - w - 1][q];
-					sumBlue += bPixels[p + w][q] - bPixels[p - w - 1][q];
-					newRedPixels[p][q] = sumRed / (2 * w + 1);
-					newGreenPixels[p][q] = sumGreen / (2 * w + 1);
-					newBluePixels[p][q] = sumBlue / (2 * w + 1);
-				}
-			}
-			//redraw
-			for (int y = 0; y < height; y ++){
-				for (int x = 0; x < width; x ++){
-					if (x <= 1 && y <= 1){
-						newRedPixels[y][x] = newRedPixels[2][2];
-						newGreenPixels[y][x] = newGreenPixels[2][2];
-						newBluePixels[y][x] = newBluePixels[2][2];
+			for ( int y=2 ; y<height-2 ; y++ ){
+				for ( int x=2 ; x<width-2 ; x++) {
+					int sr = 0, sg = 0, sb = 0;
+					for (int v = -2; v <= 2; v ++){
+						for (int u = -2; u <= 2; u ++){
+							sr += rPixels[y+v][x+u];
+							sg += gPixels[y+v][x+u];
+							sb += bPixels[y+v][x+u];
+						}
 					}
-					if (x >= height - 3 && y <= 1){
-						newRedPixels[y][x] = newRedPixels[2][width-3];
-						newGreenPixels[y][x] = newGreenPixels[2][width-3];
-						newBluePixels[y][x] = newBluePixels[2][width-3];
-					}
-					if (x <= 1 && y >= width - 3){
-						newRedPixels[y][x] = newRedPixels[height-3][2];
-						newGreenPixels[y][x] = newGreenPixels[height-3][2];
-						newBluePixels[y][x] = newBluePixels[height-3][2];
-					}
-					if (x >= height - 3 && y >= width - 3){
-						newRedPixels[y][x] = newRedPixels[height-3][width - 3];
-						newGreenPixels[y][x] = newGreenPixels[height-3][width - 3];
-						newBluePixels[y][x] = newBluePixels[height-3][width - 3];
-					}
-					int red = newRedPixels[y][x];
-					int green = newGreenPixels[y][x];
-					int blue = newBluePixels[y][x];
-					target.image.setRGB(x, y, (new Color(red, green, blue).getRGB()));
+					target.image.setRGB(x, y, (new Color(sr/25, sg/25, sb/25).getRGB()));
 				}
 			}target.repaint();
 
+
+			//+++
+
+//			//=== fixed 3/23/2019 seokho han this works
+//			for ( int y=2 ; y<height-2 ; y++ ){
+//				for ( int x=2 ; x<width-2 ; x++) {
+//					int sr = 0, sg = 0, sb = 0;
+//					for (int v = -2; v <= 2; v ++){
+//						for (int u = -2; u <= 2; u ++){
+//							Color cl = new Color(source.image.getRGB(x+u, y+v));
+//							sr += cl.getRed();
+//							sg += cl.getGreen();
+//							sb += cl.getBlue();
+//						}
+//					}
+//					target.image.setRGB(x, y, (new Color(sr/25, sg/25, sb/25).getRGB()));
+//				}
+//			}//target.repaint();
+//			//===
 		}
 
 		//Have to work on these
@@ -199,7 +157,7 @@ public class SmoothingFilter extends Frame implements ActionListener {
 			int radius = 2;
 			float sigma = radius / 3.0f;
 			float sigmaSquareTwo = sigma * sigma * 2.0f;
-		//	float sigmaRoot = (float) Math.sqrt(sigmaSquareTwo * Math.PI);
+			//	float sigmaRoot = (float) Math.sqrt(sigmaSquareTwo * Math.PI);
 			float twoSigmaSquarePI = (float) (sigmaSquareTwo * Math.PI);
 
 
@@ -217,8 +175,8 @@ public class SmoothingFilter extends Frame implements ActionListener {
 					blue = clr.getBlue();
 
 					rPixels[y][x] = clr.getRed();
-					bPixels[y][x] = clr.getGreen();
-					gPixels[y][x] = clr.getBlue();
+					gPixels[y][x] = clr.getGreen();
+					bPixels[y][x] = clr.getBlue();
 				}
 			}
 			for ( int y = 0 ; y < height ; y++ ){
@@ -296,8 +254,8 @@ public class SmoothingFilter extends Frame implements ActionListener {
 				for ( int x=0 ; x<width ; x++) {
 					Color clr = new Color(source.image.getRGB(x, y));
 					rPixels[y][x] = clr.getRed();
-					bPixels[y][x] = clr.getGreen();
-					gPixels[y][x] = clr.getBlue();
+					gPixels[y][x] = clr.getGreen();
+					bPixels[y][x] = clr.getBlue();
 				}
 			}
 
@@ -331,43 +289,6 @@ public class SmoothingFilter extends Frame implements ActionListener {
 					target.image.setRGB(x, y, (new Color(red, green, blue).getRGB()));
 				}
 			}target.repaint();
-
-
-
-			//			int tempPixel[] = new int[width*height];
-			//			int red[], green[], blue[];
-			//			for(int h = 0; h<height; h++) {
-			//				for(int w = 0; w<width; w++) {
-			//					Color clr = new Color(source.image.getRGB(w, h));
-			//					int a = clr.getAlpha();
-			//					red = new int[maskSize * maskSize];
-			//					green = new int[maskSize * maskSize];
-			//					blue = new int[maskSize * maskSize];
-			//					int index = 0;
-			//					for(int r=h-(maskSize/2); r<=h+(maskSize/2);r++) {
-			//						for(int c=w-(maskSize/2);c<=w+(maskSize/2);c++) {
-			//							if(r<0 || r>=height || c<0 || c>=width) {
-			//								continue;
-			//							} else {
-			//								red[index] = clr.getRed();
-			//								green[index] = clr.getGreen();
-			//								blue[index] = clr.getBlue();
-			//								index+=1;
-			//							}
-			//						}
-			//					}
-			//					Arrays.sort(red);
-			//					Arrays.sort(green);
-			//					Arrays.sort(blue);
-			//					int i = (index%2 == 0)?index/2-1:index/2;
-			//					int r, b, g;
-			//					r = red[i];
-			//					b = blue[i];
-			//					g = green[i];
-			//					target.image.setRGB(w, h, (new Color(r,g,b).getRGB()));
-			//				}
-			//			}
-			//			target.repaint();
 		}
 		//by Seokho Han v_1.0
 		if ( ((Button)e.getSource()).getLabel().equals("5x5 Kuwahara") ){
@@ -394,8 +315,8 @@ public class SmoothingFilter extends Frame implements ActionListener {
 				for ( int x=0 ; x<width ; x++) {
 					Color clr = new Color(source.image.getRGB(x, y));
 					rPixels[y][x] = clr.getRed();
-					bPixels[y][x] = clr.getGreen();
-					gPixels[y][x] = clr.getBlue();
+					gPixels[y][x] = clr.getGreen();
+					bPixels[y][x] = clr.getBlue();
 				}
 			}
 			//5x5 Kuwahara filter
@@ -459,26 +380,26 @@ public class SmoothingFilter extends Frame implements ActionListener {
 							//first region (left-top)
 							if (regionY <= y && regionX <= x){
 								varianceROne = ((sumROne/9) - rPixels[regionY][regionX]) * ((sumROne/9) - rPixels[regionY][regionX]);
-								varianceGOne = ((sumGOne/9) - rPixels[regionY][regionX]) * ((sumGOne/9) - rPixels[regionY][regionX]);
-								varianceBOne = ((sumBOne/9) - rPixels[regionY][regionX]) * ((sumBOne/9) - rPixels[regionY][regionX]);
+								varianceGOne = ((sumGOne/9) - gPixels[regionY][regionX]) * ((sumGOne/9) - gPixels[regionY][regionX]);
+								varianceBOne = ((sumBOne/9) - bPixels[regionY][regionX]) * ((sumBOne/9) - bPixels[regionY][regionX]);
 							}
 							//second region (right-top)
 							if (regionY <= y && regionX >= x){
 								varianceRTwo = ((sumRTwo/9) - rPixels[regionY][regionX]) * ((sumRTwo/9) - rPixels[regionY][regionX]);
-								varianceGTwo = ((sumGTwo/9) - rPixels[regionY][regionX]) * ((sumGTwo/9) - rPixels[regionY][regionX]);
-								varianceBTwo = ((sumBTwo/9) - rPixels[regionY][regionX]) * ((sumBTwo/9) - rPixels[regionY][regionX]);
+								varianceGTwo = ((sumGTwo/9) - gPixels[regionY][regionX]) * ((sumGTwo/9) - gPixels[regionY][regionX]);
+								varianceBTwo = ((sumBTwo/9) - bPixels[regionY][regionX]) * ((sumBTwo/9) - bPixels[regionY][regionX]);
 							}
 							//third region (left-bottom)
 							if (regionY >= y && regionX <= x){
 								varianceRThree = ((sumRThree/9) - rPixels[regionY][regionX]) * ((sumRThree/9) - rPixels[regionY][regionX]);
-								varianceGThree = ((sumGThree/9) - rPixels[regionY][regionX]) * ((sumGThree/9) - rPixels[regionY][regionX]);
-								varianceBThree = ((sumBThree/9) - rPixels[regionY][regionX]) * ((sumBThree/9) - rPixels[regionY][regionX]);
+								varianceGThree = ((sumGThree/9) - gPixels[regionY][regionX]) * ((sumGThree/9) - gPixels[regionY][regionX]);
+								varianceBThree = ((sumBThree/9) - bPixels[regionY][regionX]) * ((sumBThree/9) - bPixels[regionY][regionX]);
 							}
 							//fourth region (right-bottom)
 							if (regionY >= y && regionX >= x){
 								varianceRFour = ((sumRFour/9) - rPixels[regionY][regionX]) * ((sumRFour/9) - rPixels[regionY][regionX]);
-								varianceGFour = ((sumGFour/9) - rPixels[regionY][regionX]) * ((sumGFour/9) - rPixels[regionY][regionX]);
-								varianceBFour = ((sumBFour/9) - rPixels[regionY][regionX]) * ((sumBFour/9) - rPixels[regionY][regionX]);
+								varianceGFour = ((sumGFour/9) - gPixels[regionY][regionX]) * ((sumGFour/9) - gPixels[regionY][regionX]);
+								varianceBFour = ((sumBFour/9) - bPixels[regionY][regionX]) * ((sumBFour/9) - bPixels[regionY][regionX]);
 							}
 						}
 					}
